@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brain Tumor Classification</title>
+    <style>
+        :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #166088;
+            --accent-color: #4fc3f7;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: var(--dark-color);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        h1 {
+            color: var(--secondary-color);
+            margin-bottom: 10px;
+        }
+
+        .description {
+            color: #666;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .upload-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 30px;
+            border: 2px dashed #ccc;
+            border-radius: var(--border-radius);
+            background-color: var(--light-color);
+            transition: all 0.3s ease;
+        }
+
+        .upload-section:hover {
+            border-color: var(--accent-color);
+            background-color: rgba(79, 195, 247, 0.05);
+        }
+
+        .upload-btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background-color 0.3s;
+            margin-top: 15px;
+        }
+
+        .upload-btn:hover {
+            background-color: var(--secondary-color);
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        .file-name {
+            margin-top: 10px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .submit-btn {
+            display: block;
+            width: 200px;
+            margin: 20px auto;
+            padding: 12px;
+            background-color: var(--success-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        .submit-btn:hover {
+            background-color: #218838;
+        }
+
+        .submit-btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .results-section {
+            display: none;
+            margin-top: 30px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .image-preview {
+            max-width: 100%;
+            height: auto;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 20px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            max-height: 300px;
+        }
+
+        .prediction-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 20px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .prediction-title {
+            color: var(--secondary-color);
+            margin-bottom: 10px;
+        }
+
+        .prediction-result {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 15px 0;
+            padding: 10px;
+            border-radius: var(--border-radius);
+            background-color: rgba(40, 167, 69, 0.1);
+            color: var(--success-color);
+        }
+
+        .error-message {
+            color: var(--danger-color);
+            text-align: center;
+            margin-top: 10px;
+            display: none;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .upload-section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Brain Tumor Classification</h1>
+            <p class="description">
+                Upload an MRI scan image to classify whether it contains a brain tumor and determine the tumor type.
+                The system can detect glioma, meningioma, pituitary tumors, or confirm no tumor presence.
+            </p>
+        </header>
+
+        <form method="post" enctype="multipart/form-data" id="upload-form">
+            <div class="upload-section">
+                <label for="file-input" id="file-label">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    <p>Choose an MRI image file or drag it here</p>
+                    <span class="file-name" id="file-name">No file chosen</span>
+                    <button type="button" class="upload-btn" id="browse-btn">Browse Files</button>
+                </label>
+                <input type="file" id="file-input" name="file" accept="image/*">
+            </div>
+
+            <button type="submit" class="submit-btn" id="submit-btn" disabled>Analyze Image</button>
+            <p class="error-message" id="error-message">Please select a valid image file (JPEG, PNG)</p>
+        </form>
+
+        <div class="results-section" id="results-section" {% if prediction %}style="display: block;"{% endif %}>
+            <h2 class="prediction-title">Analysis Results</h2>
+            {% if image_url %}
+                <img src="{{ image_url }}" alt="Uploaded MRI Scan" class="image-preview">
+            {% endif %}
+            {% if prediction %}
+                <div class="prediction-card">
+                    <h3>Prediction</h3>
+                    <div class="prediction-result">
+                        {% set pred_text = prediction.split(' (')[0] %}
+                        {{ pred_text }}
+                    </div>
+                    <p>The AI model has analyzed your MRI scan and provided the above classification.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <footer>
+        <p>Brain Tumor Classification System &copy; 2023 | Medical AI Application</p>
+    </footer>
+
+    <script>
+        const fileInput = document.getElementById('file-input');
+        const fileName = document.getElementById('file-name');
+        const submitBtn = document.getElementById('submit-btn');
+        const errorMessage = document.getElementById('error-message');
+        const browseBtn = document.getElementById('browse-btn');
+        const fileLabel = document.getElementById('file-label');
+
+        // Trigger file input when browse button is clicked
+        browseBtn.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        // Handle file selection
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+                if (validTypes.includes(file.type)) {
+                    fileName.textContent = file.name;
+                    submitBtn.disabled = false;
+                    errorMessage.style.display = 'none';
+                } else {
+                    fileName.textContent = 'No file chosen';
+                    submitBtn.disabled = true;
+                    errorMessage.style.display = 'block';
+                    fileInput.value = ''; // Clear invalid file
+                }
+            }
+        });
+
+        // Handle drag and drop
+        fileLabel.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileLabel.style.borderColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim();
+            fileLabel.style.backgroundColor = 'rgba(79, 195, 247, 0.1)';
+        });
+
+        fileLabel.addEventListener('dragleave', () => {
+            fileLabel.style.borderColor = '#ccc';
+            fileLabel.style.backgroundColor = 'var(--light-color)';
+        });
+
+        fileLabel.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileLabel.style.borderColor = '#ccc';
+            fileLabel.style.backgroundColor = 'var(--light-color)';
+            
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                const event = new Event('change');
+                fileInput.dispatchEvent(event);
+            }
+        });
+    </script>
+</body>
+</html>
